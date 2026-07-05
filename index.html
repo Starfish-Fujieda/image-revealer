@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Slow Reveal</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main id="stageWrap">
+  <div id="stage">
+    <img id="baseImg" alt="" draggable="false">
+    <div id="cover"></div>
+    <div id="spotLayer"></div>
+    <div id="emptyMsg">
+      <p>No image selected.</p>
+      <p class="hint">Tap <strong>Images</strong> below to pick one.</p>
+    </div>
+  </div>
+</main>
+
+<div id="imageTray" class="closed" aria-hidden="true">
+  <div id="thumbStrip"></div>
+  <div class="tray-actions">
+    <button id="refreshBtn" class="btn small">↻ Refresh</button>
+    <button id="folderBtn" class="btn small">Choose folder…</button>
+  </div>
+</div>
+
+<nav id="bar">
+  <button id="imagesBtn" class="btn" aria-label="Choose image">Images</button>
+  <div id="blurGroup">
+    <span class="icon" aria-hidden="true">❄</span>
+    <input id="blurSlider" type="range" min="0" max="100" step="1" value="55" aria-label="Blur strength">
+  </div>
+  <button id="coverBtn" class="btn toggle" aria-pressed="true">Cover&nbsp;ON</button>
+  <button id="clearBtn" class="btn">Clear</button>
+  <button id="zoomResetBtn" class="btn" title="Reset zoom" disabled>1×</button>
+  <img id="logo" src="assets/logo.png" alt="Starfish English" draggable="false">
+</nav>
+
+<script src="app.js"></script>
+</body>
+</html>

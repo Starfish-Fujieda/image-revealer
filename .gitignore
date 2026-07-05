@@ -1,0 +1,18 @@
+# Python (server.py uses http.server)
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
+
+# Per-student image folders — never commit student photo sets.
+# The convention is `images-<student>/`; the README explains the workflow.
+images-*/
+
+# Default `images/` folder ships empty in this repo (see README).
+# Drop your own photos there. Keep the folder tracked via .gitkeep.
+images/*
+!images/.gitkeep
+
+# Stray marketing graphic at repo root — not referenced by the app.
+Starfish_HorizFullDark.png

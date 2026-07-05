@@ -1,0 +1,279 @@
+/* Slow Reveal — calm, touch-first styling */
+
+:root {
+  --bar-h: 72px;
+  --bg: #14161a;
+  --bar-bg: rgba(28, 31, 37, 0.96);
+  --btn-bg: #2b2f37;
+  --btn-fg: #d7dae0;
+  --accent: #7fa8d9;
+  --spot-border: rgba(255, 255, 255, 0.55);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  font-family: -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  color: var(--btn-fg);
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---------- stage ---------- */
+
+#stageWrap {
+  position: fixed;
+  inset: 0 0 var(--bar-h) 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+#stage {
+  position: relative;       /* sized by JS to the fitted image rect */
+  touch-action: none;       /* we handle all gestures ourselves */
+  transform-origin: 0 0;    /* zoom/pan applied as a transform */
+}
+
+#baseImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+#cover {
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+#cover.hidden { display: none; }
+
+#spotLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;     /* children re-enable */
+}
+
+#emptyMsg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+  color: #8a919c;
+}
+#emptyMsg p { margin: 4px; font-size: 18px; }
+#emptyMsg .hint { font-size: 15px; }
+#stage.has-image #emptyMsg { display: none; }
+
+/* ---------- spotlights ---------- */
+
+.spot {
+  position: absolute;
+  pointer-events: auto;
+  background-repeat: no-repeat;   /* size/position set by JS */
+  border: calc(2px / var(--z, 1)) solid var(--spot-border);
+  border-radius: calc(6px / var(--z, 1));
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.35);
+  touch-action: none;
+}
+
+/* close/resize targets counter-scale so they stay finger-sized (not huge)
+   at any zoom level; hit-testing follows the transform */
+/* origin = the point where each button meets the spot corner, so they hug it */
+.spot .close  { transform: scale(calc(1 / var(--z, 1))); transform-origin: 30px 14px; }
+.spot .handle { transform: scale(calc(1 / var(--z, 1))); transform-origin: 30px 30px; }
+
+.spot .close {
+  position: absolute;
+  top: -14px;
+  right: -14px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  touch-action: none;
+}
+.spot .close::after {
+  content: "×";
+  width: 28px;
+  height: 28px;
+  line-height: 26px;
+  text-align: center;
+  border-radius: 50%;
+  background: rgba(20, 22, 26, 0.85);
+  color: #e8eaee;
+  font-size: 19px;
+}
+
+.spot .handle {
+  position: absolute;
+  right: -14px;
+  bottom: -14px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: nwse-resize;
+  touch-action: none;
+}
+.spot .handle::after {
+  content: "";
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(20, 22, 26, 0.85);
+  border: 2px solid var(--spot-border);
+}
+
+/* hide spotlight chrome when the cover is off (windows are invisible anyway) */
+#stage.cover-off .spot { border-color: transparent; box-shadow: none; }
+#stage.cover-off .spot .close, #stage.cover-off .spot .handle { display: none; }
+
+/* ---------- controls bar ---------- */
+
+#bar {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  height: var(--bar-h);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px;
+  background: var(--bar-bg);
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.btn {
+  min-height: 48px;
+  min-width: 48px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 10px;
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  font-size: 16px;
+  cursor: pointer;
+}
+.btn:active { background: #3a3f49; }
+.btn[disabled] { opacity: 0.35; }
+
+#zoomResetBtn { min-width: 84px; }   /* fixed width so the bar doesn't jiggle */
+
+#logo {
+  margin-left: auto;        /* push to the right edge of the bar */
+  height: 44px;
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.btn.small { min-height: 44px; font-size: 15px; }
+
+.btn.toggle[aria-pressed="false"] {
+  background: #1f2227;
+  color: #7f8691;
+}
+
+#blurGroup {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 420px;
+}
+#blurGroup .icon { font-size: 18px; opacity: 0.7; }
+
+#blurSlider {
+  flex: 1;
+  height: 48px;           /* big touch target */
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+}
+#blurSlider::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 4px;
+  background: #3a3f49;
+}
+#blurSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 32px;
+  height: 32px;
+  margin-top: -12px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+}
+
+/* ---------- image tray ---------- */
+
+#imageTray {
+  position: fixed;
+  left: 0; right: 0;
+  bottom: var(--bar-h);
+  background: var(--bar-bg);
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+#imageTray.closed {
+  transform: translateY(8px);
+  opacity: 0;
+  pointer-events: none;
+}
+
+#thumbStrip {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.thumb {
+  flex: 0 0 auto;
+  width: 128px;
+  height: 76px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-size: cover;
+  background-position: center;
+  background-color: #22252b;
+  cursor: pointer;
+  position: relative;
+}
+.thumb.selected { border-color: var(--accent); }
+.thumb .label {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  padding: 2px 6px;
+  font-size: 11px;
+  color: #cfd3d9;
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 0 0 6px 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tray-actions { display: flex; gap: 10px; }
+
+#trayMsg { font-size: 14px; color: #8a919c; }
